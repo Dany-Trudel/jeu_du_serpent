@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
             this.affichagePointage(1);
 
-            this.pomme = new Pomme(this);
+            this.pomme = new Pomme (this);
 
             this.serpent = new Serpent(this);
 
@@ -40,6 +40,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
             this.pomme.supprimePomme();
             this.pomme = undefined;
         }
+
+            if(this.serpent !== undefined){
+                this.serpent.supprimeSerpent();
+                this.serpent = undefined;
+            }
+
         }
 
         affichagePointage(_lePointage){
@@ -69,6 +75,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
             this.serpentLongueur = 1;
             this.tblCarreSerpent = [];
+
+            this.touche = false;
+
 
             this.vitesse = 250;
             this.timing = setInterval(this.controleSerpent.bind(this), this.vitesse)
@@ -114,19 +123,60 @@ document.addEventListener("DOMContentLoaded", function(event) {
             var nextX = this.currentX + this.nextMoveX;
             var nextY = this.currentY + this.nextMoveY;
 
+            this.tblCarreSerpent.forEach(function (element){
+              if(nextX === element[1] && nextY === element[2]){
+                  console.log("toucher");
+                  this.leJeu.finPartie();
+                  this.touche = true;
+              }
+            })
+
+
+            if(nextY < 0 || nextX < 0 || nextY > this.leJeu.grandeurGrille-1 || nextX > this.leJeu.grandeurGrille-1){
+
+                console.log("PERDU");
+                this.leJeu.finPartie();
+                this.touche = true;
+
+            }
+
+
+            if(!this.touche){
+                if(this.currentX === this.leJeu.pomme.pomme[1] && this.currentY === this.leJeu.pomme.pomme[2]){
+                    this.serpentLongueur++;
+
+                    this.leJeu.affichagePointage(this.serpentLongueur);
+
+                    this.leJeu.pomme.supprimePomme();
+                    this.leJeu.pomme.ajoutePomme();
+
+                }
+
             this.dessineCarre(nextX, nextY);
             this.currentX = nextX;
             this.currentY = nextY;
-
+        }
         }
 
         dessineCarre(x, y){
 
+            var unCarre = [this.leJeu.s.rect(x * this.leJeu.grandeurCarre, y * this.leJeu.grandeurCarre, this.leJeu.grandeurCarre, this.leJeu.grandeurCarre), x , y];
 
+            this.tblCarreSerpent.push(unCarre);
+
+            if(this.tblCarreSerpent.length > this.serpentLongueur){
+                this.tblCarreSerpent[0][0].remove();
+                this.tblCarreSerpent.shift();
+            }
         }
 
         supprimeSerpent() {
+            clearInterval(this.timing);
 
+            while(this.tblCarreSerpent.length > 0){
+                this.tblCarreSerpent[0][0].remove();
+                this.tblCarreSerpent.shift();
+            }
     }
 
     }
